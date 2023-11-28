@@ -17,9 +17,20 @@ INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Movimentação', 'Aumenta a propría velocidade, salta ou teleporta.', 'Movimentacao');
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Cura', 'Aumenta a propría vida ou de algum alidado.', 'Recuperar vida');
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Dano verdadeiro', 'Aplica dano ignorando armaduras e resistencia a dano mágico.', 'Aplicar alta quantidade de dano campeões com mui');
+INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Resistencia', 'Ignora parte de um tipo de dano.', 'Reduz o dano recebido');
 
 -- Inserir o campeão (Vamos usar o ID da classe e região que acabamos de inserir)
 INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Ekko', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 1));
+INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Lux', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 3));
+INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Kassadin', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 2));
+
+-- Insira habilidades para o campeão Kassadin
+INSERT INTO `mydb`.`habilidade` (`nome`, `descricao`, `tipo_de_habilidade_id`, `id_campeao`) VALUES 
+('PEDRA DO VAZIO', 'Kassadin sofre Dano Mágico reduzido...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 6), (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin')),
+('ESFERA NULA', 'Kassadin dispara um orbe de energia do Vazio ...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin')),
+('LÂMINA ÍNFERA', 'Kassadin pode causar uma anomalia no tempo...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin')),
+('FORÇA DE PULSO', 'Kassadin causa dano e reduz velocidade de inimigos...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 2), (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin')),
+('CAMINHAR NA FENDA', 'Kassadin se teleporta para um local próximo...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin'));
 
 -- Insira habilidades para o campeão Ekko
 INSERT INTO `mydb`.`habilidade` (`nome`, `descricao`, `tipo_de_habilidade_id`, `id_campeao`) VALUES 
@@ -29,10 +40,22 @@ INSERT INTO `mydb`.`habilidade` (`nome`, `descricao`, `tipo_de_habilidade_id`, `
 ('MERGULHO FÁSICO', 'Ekko faz um rolamento evasivo...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Ekko')),
 ('CRONOQUEBRA', 'Ekko estilhaça sua linha do tempo...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Ekko'));
 
+-- Insira habilidades para o campeão Lux
+INSERT INTO `mydb`.`habilidade` (`nome`, `descricao`, `tipo_de_habilidade_id`, `id_campeao`) VALUES 
+('ILUMINAÇÃO', 'As habilidades de dano de Lux carregam o alvo...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Lux')),
+('LIGAÇÃO DA LUZ', 'Lux atira uma esfera de luz...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 2), (SELECT id FROM mydb.campeao WHERE nome = 'Lux')),
+('BARREIRA PRISMÁTICA', 'Lux lança sua varinha...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 4), (SELECT id FROM mydb.campeao WHERE nome = 'Lux')),
+('SINGULARIDADE LUCENTE', 'Dispara uma luz irregular em uma área...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Lux')),
+('CENTELHA FINAL', 'Lux dispara um feixe de luz que causa dano...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Lux'));
+
 
 -- Inserir uma skin para o campeão (Vamos usar o ID do campeão que acabamos de inserir)
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('PROJETO: Ekko', 1350, (SELECT id FROM mydb.campeao WHERE nome = 'Ekko'));
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Ekko True Damage', 1850, (SELECT id FROM mydb.campeao WHERE nome = 'Ekko'));
+INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Lux Elementalista', 3150, (SELECT id FROM mydb.campeao WHERE nome = 'Lux'));
+INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Lux Cosmos Negro', 1350, (SELECT id FROM mydb.campeao WHERE nome = 'Lux'));
+INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Kassadin Rapinante Cósmico', 1350, (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin'));
+INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Kassadin Hextec', 1350, (SELECT id FROM mydb.campeao WHERE nome = 'Kassadin'));
 
 -- Listar Nome do campeão, habilidades, skins e região
 SELECT 
