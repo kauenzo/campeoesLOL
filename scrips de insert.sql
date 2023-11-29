@@ -11,7 +11,7 @@ INSERT INTO `mydb`.`classe` (`nome`, `descricao`, `funcao_principal`, `estrategi
 INSERT INTO `mydb`.`classe` (`nome`, `descricao`, `funcao_principal`, `estrategia_recomendada`) VALUES ('Suporte', 'Campeões que aplicam cura ou resistencias em aliados, ou aplicam controle de grupo em inimigos.', 'Auxiliar o time aliado', 'Curar aliados, imobilizar inimigos.');
 INSERT INTO `mydb`.`classe` (`nome`, `descricao`, `funcao_principal`, `estrategia_recomendada`) VALUES ('Tanque', 'Campeões que resitem a grandes quantidades de danos.', 'Mitigar o dano do time aliado', 'Se jogar no meio dos inimigos enquanto o atirador e mago aplicam dano nos inimigos.');
 
--- Inserir tipos de habilidade (Assumindo que você já tem tipos de habilidade definidos, inserimos apenas um novo aqui para o exemplo)
+-- Inserir tipos de habilidade 
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Dano Mágico', 'Causa dano mágico aos oponentes.', 'Dano');
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Controle de grupo', 'Imobiliza, atordoa, diminui velocida ou outro controle de grupo.', 'Controle de grupo');
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Movimentação', 'Aumenta a propría velocidade, salta ou teleporta.', 'Movimentacao');
@@ -19,7 +19,7 @@ INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Dano verdadeiro', 'Aplica dano ignorando armaduras e resistencia a dano mágico.', 'Aplicar alta quantidade de dano campeões com mui');
 INSERT INTO `mydb`.`tipo_de_habilidade` (`nome`, `descricao`, `efeito_principal`) VALUES ('Resistencia', 'Ignora parte de um tipo de dano.', 'Reduz o dano recebido');
 
--- Inserir o campeão (Vamos usar o ID da classe e região que acabamos de inserir)
+-- Inserir o campeão 
 INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Ekko', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 1));
 INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Lux', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 3));
 INSERT INTO `mydb`.`campeao` (`nome`, `classe_id`, `regiao_id`) VALUES ('Kassadin', (SELECT id FROM mydb.classe WHERE ID = 1), (SELECT id FROM mydb.regiao WHERE ID = 2));
@@ -49,7 +49,7 @@ INSERT INTO `mydb`.`habilidade` (`nome`, `descricao`, `tipo_de_habilidade_id`, `
 ('CENTELHA FINAL', 'Lux dispara um feixe de luz que causa dano...', (SELECT id FROM mydb.tipo_de_habilidade WHERE ID = 1), (SELECT id FROM mydb.campeao WHERE nome = 'Lux'));
 
 
--- Inserir uma skin para o campeão (Vamos usar o ID do campeão que acabamos de inserir)
+-- Inserir uma skin para o campeão 
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('PROJETO: Ekko', 1350, (SELECT id FROM mydb.campeao WHERE nome = 'Ekko'));
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Ekko True Damage', 1850, (SELECT id FROM mydb.campeao WHERE nome = 'Ekko'));
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES ('Lux Elementalista', 3150, (SELECT id FROM mydb.campeao WHERE nome = 'Lux'));
@@ -74,7 +74,45 @@ GROUP BY
     c.id, r.nome;
 
 
-
--- Insira skins para o campeão Ekko (exemplo com uma skin)
+-- Insira skins para o campeão Ekko 
 INSERT INTO `mydb`.`skin` (`nome`, `preco`, `id_campeao`) VALUES 
 ('PROJECT: Ekko', 1350, (SELECT id FROM campeao WHERE nome = 'Ekko'));
+
+-- Scipts usado no projeto
+-- -----------------------------------------------------
+-- listar todos os campeões
+SELECT * FROM mydb.campeao;
+
+-- inserir um novo campeao
+INSERT INTO campeao (nome, regiao_id, classe_id) VALUES (?, ?, ?);
+
+-- atualizar um campeao
+UPDATE campeao SET nome = ?, regiao_id = ?, classe_id = ? WHERE id = ?;
+
+-- deletarCampeao
+DELETE FROM campeao WHERE id = ?;
+
+-- inserir uma nova habilidade
+INSERT INTO habilidade (nome, descricao, tipo_de_habilidade_id, id_campeao) VALUES (?, ?, ?, ?)
+
+-- listar habilidades de um campeao
+SELECT h.id, h.nome, h.descricao FROM habilidade h WHERE h.id_campeao = ?;
+
+-- atualizar habilidade de um campeao
+UPDATE habilidade SET nome = ?, descricao = ? WHERE id = ? AND id_campeao = ?;
+
+--listar todas as informações de um campeao
+SELECT 
+c.nome AS 'Nome do Campeão', 
+GROUP_CONCAT(DISTINCT h.nome ORDER BY h.id SEPARATOR ', ') AS 'Habilidades', 
+GROUP_CONCAT(DISTINCT s.nome ORDER BY s.id SEPARATOR ', ') AS 'Skins', 
+r.nome AS 'Região' 
+FROM mydb.campeao c 
+LEFT JOIN mydb.habilidade h ON c.id = h.id_campeao 
+LEFT JOIN mydb.skin s ON c.id = s.id_campeao 
+LEFT JOIN mydb.regiao r ON c.regiao_id = r.id
+WHERE c.id = ?
+GROUP BY c.id, r.nome;
+
+-- listar campeos de uma regiao
+SELECT c.nome FROM campeao c WHERE c.regiao_id = ?;

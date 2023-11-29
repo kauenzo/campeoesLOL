@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`regiao` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(45) NOT NULL,
   `descricao` TEXT NOT NULL,
-  `historia` TEXT NULL,
+  `historia` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
 ENGINE = InnoDB;
