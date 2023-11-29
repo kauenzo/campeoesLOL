@@ -1,10 +1,10 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.*;
-import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 
 public class Main {
-    private static Scanner scanner = new Scanner(System.in);
-
+    private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     public static void main(String[] args) {
         int opcao;
         do {
@@ -51,14 +51,21 @@ public class Main {
     }
 
     private static int lerOpcao() {
-        System.out.print("Digite a opção: ");
-        while (!scanner.hasNextInt()) {
-            scanner.next();
-            System.out.println("Digite o número correto.");
+        int opcao = -1;
+        while (opcao == -1) {
             System.out.print("Digite a opção: ");
+            try{
+                String line = reader.readLine();
+                opcao = Integer.parseInt(line);
+                System.out.println("-------------------------------");
+            } catch (NumberFormatException e){
+                System.out.println("Digite o número correto.");
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
         }
-        System.out.println("-------------------------------");
-        return scanner.nextInt();
+        return opcao;
     }
 
     private static void processarOpcao(int opcao) {
@@ -128,49 +135,62 @@ public class Main {
     }
 
     private static void inserirCampeao(){
-        System.out.print("Digite o nome do campeão: ");
-        String nome = scanner.next();
+        try {
+            System.out.println("---- INSERIR NOVO CAMPEÃO ---- ");
+            System.out.print("Digite o nome do campeão: ");
+            String nome = reader.readLine();
 
-        System.out.println("A qual região '" + nome + "' pertence?");
-        int idRegiao = selecionarOpcao("regiao");
-        if(idRegiao == -1){
-            System.out.println("Erro ao selecionar região.");
-        }
+            System.out.println("A qual região '" + nome + "' pertence?");
+            int idRegiao = selecionarOpcao("regiao");
+            if(idRegiao == -1){
+                System.out.println("Erro ao selecionar região.");
+            }
 
-        System.out.println("A qual classe '" + nome + "' pertence?");
-        int idClasse = selecionarOpcao("classe");
-        if(idClasse == -1){
-            System.out.println("Erro ao selecionar classe.");
-        }
+            System.out.println("A qual classe '" + nome + "' pertence?");
+            int idClasse = selecionarOpcao("classe");
+            if(idClasse == -1){
+                System.out.println("Erro ao selecionar classe.");
+            }
 
-        String query = "INSERT INTO campeao (nome, regiao_id, classe_id) VALUES (?, ?, ?)";
-        try (Connection conn = DatabaseConnector.connect();
-            PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, nome);
-                pstmt.setInt(2, idRegiao);
-                pstmt.setInt(3, idClasse);
-                pstmt.executeUpdate();
-                System.out.println("Campeão " + nome 
-                        + ", da classe '" + " inserido com sucesso!");
+            String nomeClasse = getNomePeloID(idClasse, "classe");
+            String nomeRegiao = getNomePeloID(idClasse, "regiao");
 
-
-        } catch (Exception e){
-            e.printStackTrace();
+            String query = "INSERT INTO campeao (nome, regiao_id, classe_id) VALUES (?, ?, ?)";
+            try (Connection conn = DatabaseConnector.connect();
+                PreparedStatement pstmt = conn.prepareStatement(query)) {
+                    pstmt.setString(1, nome);
+                    pstmt.setInt(2, idRegiao);
+                    pstmt.setInt(3, idClasse);
+                    pstmt.executeUpdate();
+                    System.out.println("Campeão '" + nome
+                            + "', da classe '" + nomeClasse +
+                            "' inserido com sucesso na região '" + nomeRegiao +"'!");
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        } catch (IOException e){
+        e.printStackTrace();
         }
     }
 
     private  static void atualizarCampeao(){
-        // listar campeõs selecionados
+        System.out.println("---- ATUALIZAR UM CAMPEÃO ---- ");
         int idCampeao = selecionarOpcao("campeao");
         if(idCampeao == -1){
             System.out.println("Erro ao selecionar campeão");
             return;
         }
 
+        String nomeAntigo = getNomePeloID(idCampeao, "campeao");
+
         System.out.println("-------------------------------\n");
         System.out.print("Digite o novo nome do campeão: ");
-        String novoNome = scanner.next();
-        scanner.nextLine();
+        String novoNome = "";
+        try{
+            novoNome = reader.readLine();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
 
         System.out.println("-------------------------------\n");
         System.out.println("A qual região '" + novoNome + "' irá pertencer?");
@@ -209,8 +229,9 @@ public class Main {
             int afetados = pstmt.executeUpdate();
             if(afetados > 0){
                 System.out.println(
-                        "Campeão '" + novoNome +
-                        "' atualizado para classe '" + nomeClasse +
+                        "Campeão '" + nomeAntigo +
+                        "' teve o nome atualizado para '" + novoNome +
+                        "', e agora pertence a classe '" + nomeClasse +
                         "' e região '" + nomeRegiao +"'!"
                 );
             } else {
@@ -224,7 +245,8 @@ public class Main {
     }
 
     private static void deletarCampeao(){
-        System.out.print("Qual campeão deseja deletar");
+        System.out.println("---- DELETAR CAMPEÃO ---- ");
+        System.out.println("Qual campeão deseja deletar?");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1) {
             System.out.println("Erro ao selecionar campeão.");
@@ -250,7 +272,8 @@ public class Main {
     }
 
     private static void inserirHabilidade(){
-        System.out.print("A nova habilidade pertencerá a qual campeão?");
+        System.out.println("---- INSERIR NOVA HABILIDADE ---- ");
+        System.out.println("A nova habilidade pertencerá a qual campeão?");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1) {
             System.out.println("Erro ao selecionar campeão.");
@@ -264,12 +287,21 @@ public class Main {
             System.out.println("Erro ao selecionar tipo de habilidade");
         }
 
-        scanner.nextLine();
         System.out.print("Nome da habilidade: ");
-        String nomeHabilidade = scanner.nextLine();
+        String nomeHabilidade = "";
+        try{
+            nomeHabilidade = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.out.print("Descrição breve da habilidade: ");
-        String descricaoHabilidade = scanner.nextLine();
+        String descricaoHabilidade = "";
+        try {
+            descricaoHabilidade = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         String query = "INSERT INTO habilidade (nome, descricao, tipo_de_habilidade_id, id_campeao) VALUES (?, ?, ?, ?)";
         try(Connection conn = DatabaseConnector.connect();
@@ -282,14 +314,15 @@ public class Main {
 
             pstmt.executeUpdate();
 
-            System.out.println("Habilidade " + nomeHabilidade + " inserida com sucesso para o campeão '" + nomeDoCampeao + "'!");
+            System.out.println("Habilidade '" + nomeHabilidade + "' inserida com sucesso para o campeão '" + nomeDoCampeao + "'!");
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
     private static int listarHabilidadesDoCampeao(int campeao){
-        System.out.print("Escolha um campeão para exibir suas habilidades");
+        System.out.println("---- LISTAR HABILIDADES DE UM CAMPEÃO ---- ");
+        System.out.println("Escolha um campeão para exibir suas habilidades");
         int idCampeao;
         if (campeao == -1) {
             idCampeao = selecionarOpcao("campeao");
@@ -326,7 +359,8 @@ public class Main {
     }
 
     private static void atualizarHabilidade(){
-        System.out.print("Selecione um campeão");
+        System.out.println("---- ATUALIZAR UMA HABILIDADE ---- ");
+        System.out.println("Selecione um campeão");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1){
             System.out.println("Erro ao selecionar campeão");
@@ -334,14 +368,32 @@ public class Main {
 
         listarHabilidadesDoCampeao(idCampeao);
         System.out.print("Qual o ID da habilidade que deseja atualizar: ");
-        int idHabilidade = scanner.nextInt();
-        scanner.nextLine();
+        int idHabilidade = -1;
+        try {
+            idHabilidade = Integer.parseInt(reader.readLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Por favor, insira um número válido.");
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
         System.out.print("Qual será o novo nome da habilidade ["+idHabilidade+"]? R: ");
-        String novoNome = scanner.nextLine();
+        String novoNome = "";
+        try {
+            novoNome = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.out.print("Qual a descrição para a habilidade '" + novoNome +"'? R:");
-        String novaDescricao = scanner.nextLine();
+        String novaDescricao = "";
+        try {
+            novaDescricao = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         String nomeCampeao = getNomePeloID(idCampeao, "campeao");
 
@@ -372,7 +424,8 @@ public class Main {
     }
 
     private static void deletarHabilidade(){
-        System.out.print("Selecione um campeão");
+        System.out.println("---- DELETAR UMA HABILIDADE ---- ");
+        System.out.println("Selecione um campeão");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1) {
             System.out.println("Erro ao selecionar o campeão.");
@@ -381,8 +434,15 @@ public class Main {
         listarHabilidadesDoCampeao(idCampeao);
 
         System.out.print("Digite o ID da habilidade que deseja deletar: ");
-        int idHabilidade = scanner.nextInt();
-        scanner.nextLine();
+        int idHabilidade = -1;
+        try {
+            idHabilidade = Integer.parseInt(reader.readLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Por favor, insira um número válido.");
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         String nomeHabilidade =getNomePeloID(idHabilidade, "habilidade");
         String nomeCampeao =getNomePeloID(idCampeao, "habilidade");
@@ -412,23 +472,34 @@ public class Main {
     }
 
     private static void inserirSkin(){
-        System.out.print("Qual campeão irá receber uma nova skin?");
+        System.out.println("---- INSERIR UMA NOVA SKIN ---- ");
+        System.out.println("Qual campeão irá receber uma nova skin?");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1) {
             System.out.println("Erro ao selecionar o campeão.");
         }
 
-        scanner.nextLine();
         System.out.print("Nome da skin: ");
-        String nomeSkin = scanner.nextLine();
+        String nomeSkin = "";
+        try {
+            nomeSkin = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.out.print("Preço da skin: ");
-        while (!scanner.hasNextInt()) {
-            scanner.next(); // Descarta a entrada inválida
-            System.out.println("Por favor, insira um número válido para o preço.");
-            System.out.print("Digite o preço da skin: ");
+        int precoSkin = -1;
+        while (precoSkin == -1) {
+            try {
+                precoSkin = Integer.parseInt(reader.readLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, insira um número válido para o preço.");
+                System.out.print("Digite o preço da skin: ");
+                precoSkin = -1;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        int precoSkin = scanner.nextInt();
 
         String nomeCampeao = getNomePeloID(idCampeao, "campeao");
 
@@ -451,7 +522,8 @@ public class Main {
     }
 
     private static void listarInformacoesDoCampeao(){
-        System.out.print("Escolha um campeão");
+        System.out.println("---- LISTAR INFORMAÇÕES DE UM CAMPEÃO ---- ");
+        System.out.println("Escolha um campeão");
         int idCampeao = selecionarOpcao("campeao");
         if (idCampeao == -1) {
             System.out.println("Erro ao selecionar o campeão.");
@@ -495,7 +567,8 @@ public class Main {
     }
 
     private static void listarCampeoesPorRegiao() {
-        System.out.print("Escolha um região");
+        System.out.println("---- LISTAR CAMPEÕES POR REGIÃO ---- ");
+        System.out.println("Escolha um região");
         int idRegiao = selecionarOpcao("regiao");
         if (idRegiao == -1) {
             System.out.println("Erro ao selecionar a região.");
@@ -511,6 +584,7 @@ public class Main {
             pstmt.setInt(1, idRegiao);
 
             try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("\n-------------------------------");
                 System.out.println("Campeões da região '" + nomeRegiao + "':");
                 boolean temCampeoes = false;
                 while (rs.next()) {
@@ -529,7 +603,8 @@ public class Main {
     }
 
     private static void listarCampeoesPorClasse() {
-        System.out.print("Escolha uma classe");
+        System.out.println("---- LISTAR CAMPEÕES POR CLASSE ---- ");
+        System.out.println("Escolha uma classe");
         int idClasse = selecionarOpcao("classe");
         if (idClasse == -1) {
             System.out.println("Erro ao selecionar a classe.");
@@ -546,7 +621,8 @@ public class Main {
             pstmt.setInt(1, idClasse);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                System.out.println("Campeões da região '" + nomeClasse + "':");
+                System.out.println("\n-------------------------------");
+                System.out.println("Campeões da classe '" + nomeClasse + "':");
                 boolean temCampeoes = false;
                 while (rs.next()) {
                     String nomeCampeao = rs.getString("nome");
@@ -564,34 +640,34 @@ public class Main {
     }
 
     private static int selecionarOpcao(String tabela){
-        try(Connection conn = DatabaseConnector.connect();
-        Statement stmt = conn.createStatement()){
+        try (Connection conn = DatabaseConnector.connect();
+             Statement stmt = conn.createStatement()) {
             String query = "SELECT * FROM " + tabela;
             ResultSet rs = stmt.executeQuery(query);
 
-            while(rs.next()){
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 System.out.println(id + " - " + nome);
             }
 
-            int escolha;
+            int escolha = -1;
 
             do {
                 System.out.print("ID da opção escolhida: ");
-                while(!scanner.hasNextInt()){
-                    scanner.next();
-                    System.out.println("Digite um numero valido.");
-                    System.out.print("Digite o ID da opção escolhida");
-                }
-                escolha = scanner.nextInt();
-                if(!opcaoValida(tabela, escolha)){
-                    System.out.println("Opção invalida. Escolha um ID valido.");
-                    escolha = -1;
+                String line = reader.readLine();
+                try{
+                    escolha = Integer.parseInt(line);
+                    if (!opcaoValida(tabela, escolha)) {
+                        System.out.println("Opção invalida. Escolha um ID valido.");
+                        escolha = -1;
+                    }
+                }catch (NumberFormatException e){
+                    System.out.println("Digite um numero válido.");
                 }
             } while (escolha == -1);
             return escolha;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
